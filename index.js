@@ -46,8 +46,9 @@ client.connect(err => {
     // delete Product
     app.delete("/userProducts/:id", async (req, res) => {
         const id = req.query.id;
-        console.log('deleting user with id', id);
-        res.json(1);
+        const query = { _id: ObjectId(id) };
+        const result = await UserProductsCollection.deleteOne(query);
+        res.json(result);
     });
 
     // users API
@@ -83,16 +84,8 @@ client.connect(err => {
         res.json(result);
     });
 
-    // // GET SINGLE Product
-    // app.get('/products/:id', async (req, res) => {
-    //     const id = req.params.id;
-    //     console.log('getting specific products', id);
-    //     const query = { _id: ObjectId(id) };
-    //     const product = await ProductCollection.findOne(query);
-    //     res.json(product);
-    // })
 
-    // client.close();
+    client.close();
 });
 
 
