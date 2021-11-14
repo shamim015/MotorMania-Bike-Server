@@ -21,12 +21,18 @@ client.connect(err => {
     const ProductCollection = database.collection("products");
     const UserProductsCollection = database.collection("userProducts");
     const usersCollection = database.collection("users");
+    const ReviewCollection = database.collection("addReview");
 
     // get API
     app.get('/products', async (req, res) => {
         const result = await ProductCollection.find({}).toArray();
         res.send(result);
-        console.log(result);
+    });
+
+    // userProducts API
+    app.post("/userProducts", async (req, res) => {
+        const result = await UserProductsCollection.insertOne(req.body);
+        res.json(result);
     });
 
     app.get('/userProducts', async (req, res) => {
@@ -37,9 +43,16 @@ client.connect(err => {
         res.json(userProduct);
     });
 
-    // userProducts API
-    app.post("/userProducts", async (req, res) => {
-        const result = await UserProductsCollection.insertOne(req.body);
+    // delete Product
+    app.delete("/userProducts/:id", async (req, res) => {
+        const id = req.query.id;
+        console.log('deleting user with id', id);
+        res.json(1);
+    });
+
+    // users API
+    app.post('/users', async (req, res) => {
+        const result = await usersCollection.insertOne(req.body);
         res.json(result);
     });
 
@@ -54,13 +67,6 @@ client.connect(err => {
         res.json({ admin: isAdmin });
     })
 
-    // users API
-    app.post('/users', async (req, res) => {
-        const result = await usersCollection.insertOne(req.body);
-        console.log(result);
-        res.json(result);
-    });
-
     // admin API
     app.put('/users', async (req, res) => {
         const user = req.body;
@@ -71,31 +77,20 @@ client.connect(err => {
         res.json(result);
 
     })
+    // Add Review
+    app.post('/addReview', async (req, res) => {
+        const result = await ReviewCollection.insertOne(req.body);
+        res.json(result);
+    });
 
-    // add package
-    // app.post("/addProduct", async (req, res) => {
-    //     console.log(req.body);
-    //     const result = await ProductCollection.insertOne(req.body);
-    //     console.log(result);
-    // });
-
-    // delete Product
-
-    // app.delete("/deleteProduct/:id", async (req, res) => {
-    //     console.log(req.params.id);
-    //     const result = await ProductCollection.deleteOne({
-    //         _id: ObjectId(req.params.id),
-    //     });
-    //     res.send(result);
-    // });
-    // GET SINGLE Product
-    app.get('/products/:id', async (req, res) => {
-        const id = req.params.id;
-        console.log('getting specific products', id);
-        const query = { _id: ObjectId(id) };
-        const product = await ProductCollection.findOne(query);
-        res.json(product);
-    })
+    // // GET SINGLE Product
+    // app.get('/products/:id', async (req, res) => {
+    //     const id = req.params.id;
+    //     console.log('getting specific products', id);
+    //     const query = { _id: ObjectId(id) };
+    //     const product = await ProductCollection.findOne(query);
+    //     res.json(product);
+    // })
 
     // client.close();
 });
