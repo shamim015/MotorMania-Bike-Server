@@ -29,6 +29,13 @@ client.connect(err => {
         res.send(result);
     });
 
+    // add products
+    app.post("/addProducts", async (req, res) => {
+        console.log(req.body);
+        const result = await ProductCollection.insertOne(req.body);
+        console.log(result);
+    });
+
     // userProducts API
     app.post("/userProducts", async (req, res) => {
         const result = await UserProductsCollection.insertOne(req.body);
@@ -84,8 +91,7 @@ client.connect(err => {
         res.json(result);
     });
 
-
-    client.close();
+    // client.close();
 });
 
 
