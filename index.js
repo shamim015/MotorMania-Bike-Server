@@ -1,7 +1,7 @@
 const express = require('express')
-const { MongoClient } = require('mongodb');
 const cors = require('cors');
 require('dotenv').config();
+const { MongoClient } = require('mongodb');
 const ObjectId = require('mongodb').ObjectId;
 
 const app = express()
@@ -17,31 +17,77 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 
 client.connect(err => {
-    const ProductCollection = client.db("MotorMania").collection("Products");
+    const database = client.db("MotorMania")
+    const ProductCollection = database.collection("products");
+    const UserProductsCollection = database.collection("userProducts");
+    const usersCollection = database.collection("users");
 
     // get API
-    app.get('/product', async (req, res) => {
+    app.get('/products', async (req, res) => {
         const result = await ProductCollection.find({}).toArray();
         res.send(result);
         console.log(result);
     });
 
-    // add package
-    app.post("/addProduct", async (req, res) => {
-        console.log(req.body);
-        const result = await ProductCollection.insertOne(req.body);
-        console.log(result);
+    app.get('/userProducts', async (req, res) => {
+        const email = req.query.email;
+        const query = { email: email };
+        const cursor = UserProductsCollection.find(query);
+        const userProduct = await cursor.toArray();
+        res.json(userProduct);
     });
+
+    // userProducts API
+    app.post("/userProducts", async (req, res) => {
+        const result = await UserProductsCollection.insertOne(req.body);
+        res.json(result);
+    });
+
+    app.get('/users/:email', async (req, res) => {
+        const email = req.params.email;
+        const query = { email: email };
+        const user = await usersCollection.findOne(query);
+        let isAdmin = false;
+        if (user?.role === 'admin') {
+            isAdmin = true;
+        }
+        res.json({ admin: isAdmin });
+    })
+
+    // users API
+    app.post('/users', async (req, res) => {
+        const result = await usersCollection.insertOne(req.body);
+        console.log(result);
+        res.json(result);
+    });
+
+    // admin API
+    app.put('/users', async (req, res) => {
+        const user = req.body;
+        console.log('put', user);
+        const filter = { email: user.email };
+        const updateDoc = { $set: { role: 'admin' } };
+        const result = await usersCollection.updateOne(filter, updateDoc);
+        res.json(result);
+
+    })
+
+    // add package
+    // app.post("/addProduct", async (req, res) => {
+    //     console.log(req.body);
+    //     const result = await ProductCollection.insertOne(req.body);
+    //     console.log(result);
+    // });
 
     // delete Product
 
-    app.delete("/deleteProduct/:id", async (req, res) => {
-        console.log(req.params.id);
-        const result = await ProductCollection.deleteOne({
-            _id: ObjectId(req.params.id),
-        });
-        res.send(result);
-    });
+    // app.delete("/deleteProduct/:id", async (req, res) => {
+    //     console.log(req.params.id);
+    //     const result = await ProductCollection.deleteOne({
+    //         _id: ObjectId(req.params.id),
+    //     });
+    //     res.send(result);
+    // });
     // GET SINGLE Product
     app.get('/products/:id', async (req, res) => {
         const id = req.params.id;
