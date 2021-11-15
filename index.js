@@ -99,6 +99,11 @@ client.connect(err => {
         res.json(result);
     });
 
+    app.get('/AllReview', async (req, res) => {
+        const result = await ReviewCollection.find({}).toArray();
+        res.send(result);
+    });
+
     // client.close();
 });
 
